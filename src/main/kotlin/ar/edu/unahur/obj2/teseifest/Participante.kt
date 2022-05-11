@@ -36,14 +36,14 @@ class Participante(val edad: Int, val instagram: String, val celular: String, va
       HoraNombreEscenario(entry.key, entry.value, escenario)
     ) } } // Lista HoraNombreEscenario con todos los conciertos
 
-    todosLosConciertosConEscenario.filter { e -> artistasFavoritos.contains(e.nombre) } // Lista HoraNombreEscenario solo de artistas favoritos
+    var conciertosFiltrados = todosLosConciertosConEscenario.filter { e -> artistasFavoritos.contains(e.nombre) && e.hora.isAfter(hora) } // Lista HoraNombreEscenario solo de artistas favoritos
 
-    var proximoConcierto = todosLosConciertosConEscenario.find { e -> e.hora.isAfter(LocalDateTime.now()) }
+    var proximoConcierto = conciertosFiltrados.maxByOrNull { e -> e.hora }
 
     if( proximoConcierto == null){
       throw Exception("Tus artistas favoritos ya no tienen mas conciertos")
     }
-    todosLosConciertosConEscenario.forEach { e ->
+    conciertosFiltrados.forEach { e ->
         if(e.hora.isAfter(LocalDateTime.now()) && e.hora.isBefore(proximoConcierto!!.hora)){
           proximoConcierto = e
         }
@@ -82,10 +82,24 @@ class Participante(val edad: Int, val instagram: String, val celular: String, va
     registroAlcohol.add(ControladorAlcohol(LocalDateTime.now(),producto))
 
     when{
-      dineroGastadoFoodTrucks >= 1000 && !consiguioAccesoFANPorFoodTruck -> vipDisponibles ++
-      dineroGastadoFoodTrucks >= 2000 && !consiguioAccesoREFANPorFoodTruck -> vipDisponibles ++
-      dineroGastadoFoodTrucks >= 3000 && !consiguioAccesoSUPERFANPorFoodTruck -> vipDisponibles ++
+      dineroGastadoFoodTrucks >= 1000 && !consiguioAccesoFANPorFoodTruck -> conseguirAccesoFANPorFoodTruck()
+      dineroGastadoFoodTrucks >= 2000 && !consiguioAccesoREFANPorFoodTruck -> conseguirAccesoREFANPorFoodTruck()
+      dineroGastadoFoodTrucks >= 3000 && !consiguioAccesoSUPERFANPorFoodTruck -> conseguirAccesoSUPERFANPorFoodTruck()
     }
+  }
+
+  fun conseguirAccesoFANPorFoodTruck(){
+    vipDisponibles ++
+    consiguioAccesoFANPorFoodTruck = true
+  }
+
+  fun conseguirAccesoREFANPorFoodTruck(){
+    vipDisponibles ++
+    consiguioAccesoREFANPorFoodTruck = true
+  }
+  fun conseguirAccesoSUPERFANPorFoodTruck(){
+    vipDisponibles ++
+    consiguioAccesoSUPERFANPorFoodTruck = true
   }
 
   fun puedeEntrarVip(escenario: Escenario): Boolean{
@@ -99,18 +113,28 @@ class Participante(val edad: Int, val instagram: String, val celular: String, va
     if (!escenariosVipALosQueYaIngreso.contains(escenario)){
       vipDisponibles --
       escenariosVipALosQueYaIngreso.add(escenario)
-      escenario.registroVip.add(RegistroIngresoVip(LocalDateTime.now(), this))
+      escenario.registroVip.add(RegistroIngresoVip(LocalDateTime.now(), this, escenario)) }
   }
 
   fun compraEntradaFAN(){
+    if ((vipDisponibles + escenariosVipALosQueYaIngreso.size) >= Festival.escenarios.size){
+      throw Exception(" Ya podes entrar a cuaquier escenario!")
+    }
     vipDisponibles ++
     dineroGastadoAcceso += 1000
   }
   fun compraEntradaREFAN(){
+    if ((vipDisponibles + escenariosVipALosQueYaIngreso.size) >= Festival.escenarios.size - 1){
+      throw Exception(" Te conviene comprar la entrada FAN ")
+    }
     vipDisponibles =+ 2
     dineroGastadoAcceso += 2000
   }
+
   fun compraEntradaSUPERFAN(){
+    if ((vipDisponibles + escenariosVipALosQueYaIngreso.size) >= Festival.escenarios.size - 2){
+      throw Exception(" Te conviene comprar la entrada REFAN o FAN")
+    }
     vipDisponibles =+ 3
     dineroGastadoAcceso += 3000
   }
@@ -119,5 +143,4 @@ class Participante(val edad: Int, val instagram: String, val celular: String, va
 
 class ControladorAlcohol(val horario: LocalDateTime, val bebidaAlcoholica: Consumible){
 
-}
 }

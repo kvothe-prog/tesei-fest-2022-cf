@@ -38,5 +38,5 @@ class HoraNombreEscenario(val hora: LocalDateTime, val nombre: String, val escen
 
 }
 
-class RegistroIngresoVip(val hora: LocalDateTime, val participante: Participante){
+class RegistroIngresoVip(val hora: LocalDateTime, val participante: Participante, val escenario: Escenario){
 }

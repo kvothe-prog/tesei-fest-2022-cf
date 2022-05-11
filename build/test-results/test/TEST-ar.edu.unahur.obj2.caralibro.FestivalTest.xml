@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ar.edu.unahur.obj2.caralibro.FestivalTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2022-05-11T23:25:10" hostname="DESKTOP-UDRHFF1" time="0.134">
+  <properties/>
+  <testcase name="Acceder a escenario VIP por entrada" classname="ar.edu.unahur.obj2.caralibro.FestivalTest" time="0.053"/>
+  <testcase name="Acceder a escenario VIP por foodtrucks" classname="ar.edu.unahur.obj2.caralibro.FestivalTest" time="0.011"/>
+  <testcase name="Mostrar para una hora el proximo escenario donde tocará uno de los artistas favoritos" classname="ar.edu.unahur.obj2.caralibro.FestivalTest" time="0.004"/>
+  <testcase name="Comprar comidas y bebidas" classname="ar.edu.unahur.obj2.caralibro.FestivalTest" time="0.004"/>
+  <testcase name="teseifest" classname="ar.edu.unahur.obj2.caralibro.FestivalTest" time="0.205"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

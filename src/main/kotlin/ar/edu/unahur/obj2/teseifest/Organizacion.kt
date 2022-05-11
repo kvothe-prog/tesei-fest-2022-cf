@@ -31,11 +31,11 @@ object Organizacion {
     fun promedioCCAlcohol(): Int{
         var soloLosQueTomaronAlcohol = registroIngresos.filter { e -> e.participante.registroAlcohol.size > 0 }
         var cantidadAlcohol = soloLosQueTomaronAlcohol.sumBy { e -> e.participante.registroAlcohol.sumBy { e -> e.bebidaAlcoholica.cantidadAlcohol().toInt() } }
-        return cantidadAlcohol / registroIngresos.size
+        return cantidadAlcohol / soloLosQueTomaronAlcohol.size
     }
 
     fun porcentajeTomaron80cc(): Int {
-        var cantidadQueTomaronMas80 = registroIngresos.count() { e -> e.participante.registroAlcohol.sumBy { e -> e.bebidaAlcoholica.cantidadAlcohol().toInt() } > 80}
+        var cantidadQueTomaronMas80 = registroIngresos.count() { e -> e.participante.registroAlcohol.sumBy { e -> e.bebidaAlcoholica.cantidadAlcohol().toInt() } >= 80}
         return (cantidadQueTomaronMas80 * 100) / registroIngresos.size
     }
 
@@ -55,10 +55,10 @@ object Organizacion {
         }
         var listaVentas = mutableListOf<Venta>()
         foodTrucks.forEach { e -> listaVentas.addAll(e.ventas) }
-        listaVentas.filter { e -> e.producto.esBebida()}
-        listaVentas.map { e -> e.producto }
+        var listaVentaBebidas = listaVentas.filter { e -> e.producto.esBebida()}
+        var listaBebidas = listaVentas.map { e -> e.producto }
 
-        return listaVentas.groupingBy { it }.eachCount().maxByOrNull { e -> e.value }?.key?.producto
+        return listaBebidas.groupingBy { it }.eachCount().maxByOrNull { e -> e.value }?.key
 
     }
 
@@ -68,21 +68,36 @@ object Organizacion {
         }
         var listaVentas = mutableListOf<Venta>()
         foodTrucks.forEach { e -> listaVentas.addAll(e.ventas) }
-        listaVentas.filter { e -> e.producto.esBebida()}
-        listaVentas.filter { e -> e.horario.isAfter(hora) && e.horario.isBefore(hora.plusHours(1)) }
-        listaVentas.map { e -> e.producto }
+        var listaVentaBebidas = listaVentas.filter { e -> e.producto.esBebida()}
+        var listaVentaBebidasAEsaHora = listaVentaBebidas.filter { e -> e.horario.isAfter(hora) && e.horario.isBefore(hora.plusHours(1)) }
+        var listaBebidasAEsaHora = listaVentaBebidasAEsaHora.map { e -> e.producto }
 
-        return listaVentas.groupingBy { it }.eachCount().maxByOrNull { e -> e.value }?.key?.producto
+        if(listaBebidasAEsaHora.isEmpty()){
+            throw Exception("No se compraron bebidas a esa hora")
+        }
+
+        return listaBebidasAEsaHora.groupingBy { it }.eachCount().maxByOrNull { e -> e.value }?.key
 
     }
 
-    fun dosPersonasTienenMismaOnda(persona1: Participante, persona2: Participante): Boolean{
+    fun dosPersonasEntronAUnaZonaVipALaMismaHora(persona1: Participante, persona2: Participante): Boolean{
         var listaTodosIngresosVip = mutableListOf<RegistroIngresoVip>()
         escenarios.forEach { e -> listaTodosIngresosVip.addAll(e.registroVip) }
-        listaTodosIngresosVip.filter { e -> e.participante == persona1 || e.participante == persona2 }
+        var listaIngresosVipParticipantes = listaTodosIngresosVip.filter { e -> e.participante == persona1 || e.participante == persona2 }
+        var listaDateTimeIngresosVip = listaIngresosVipParticipantes.map { e -> e.hora }
+        var listaSoloHorasIngresosVip = listaDateTimeIngresosVip.map { e -> e.hour }
 
-        return listaTodosIngresosVip.groupingBy { it.hora }.eachCount().filter { e -> e.value > 1 }.isNotEmpty()
+        return listaSoloHorasIngresosVip.groupingBy { it }.eachCount().filter { e -> e.value > 1 }.isNotEmpty()
     }
+
+    fun dosPersonasTienenAlMenosDosArtistasFavoritosEnComun(persona1: Participante, persona2: Participante): Boolean{
+        return persona1.artistasFavoritos.intersect(persona2.artistasFavoritos).size >= 2
+    }
+
+    fun dosPersonasTienenLaMismaOnda(persona1: Participante, persona2: Participante): Boolean{
+        return dosPersonasEntronAUnaZonaVipALaMismaHora(persona1, persona2) || dosPersonasTienenAlMenosDosArtistasFavoritosEnComun(persona1, persona2)
+    }
+
 }
 
 class Ingreso(val participante: Participante, val horaIngreso: LocalDateTime){

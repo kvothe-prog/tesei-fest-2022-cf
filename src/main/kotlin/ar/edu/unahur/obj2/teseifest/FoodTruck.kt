@@ -17,7 +17,7 @@ class Comida(precio: Int, descripcion: String, foodTruck: FoodTruck, esVegano: B
 
 class Bebida(precio: Int, descripcion: String, val volumen: Int, val porcentajeAlcohol: Double, foodTruck: FoodTruck, esVegano: Boolean): Consumible(precio, descripcion, foodTruck, esVegano){
     override fun cantidadAlcohol(): Double{
-        return porcentajeAlcohol * volumen
+        return (porcentajeAlcohol * volumen) / 100
     }
 
     override fun esBebida(): Boolean {
@@ -25,7 +25,8 @@ class Bebida(precio: Int, descripcion: String, val volumen: Int, val porcentajeA
     }
 }
 
-class FoodTruck (val ventas: MutableList<Venta>){
+class FoodTruck (){
+    val ventas = mutableListOf<Venta>()
     fun registrarVenta(venta: Venta){
         ventas.add(venta)
     }

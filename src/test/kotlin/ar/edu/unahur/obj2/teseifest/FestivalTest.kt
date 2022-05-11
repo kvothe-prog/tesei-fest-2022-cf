@@ -29,13 +29,3 @@ class UsuarioTest : DescribeSpec({
 
 
  */
-class Prueba : DescribeSpec({
-  val fecha1 = LocalDateTime.of(2022,5,6,1,30,30)
-  val fecha2 = LocalDateTime.of(2022,5,6,2,30,30)
-  val fecha3 = LocalDateTime.of(2022,5,6,3,0,30)
-
-  val lista = mutableListOf<LocalDateTime>(fecha1, fecha2, fecha3)
-  describe("Fecha"){
-    lista.minByOrNull { fecha -> fecha - LocalDateTime.now() }.shouldBe(fecha1)
-  }
-})

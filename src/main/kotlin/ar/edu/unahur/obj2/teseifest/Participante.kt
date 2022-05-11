@@ -3,30 +3,32 @@ package ar.edu.unahur.obj2.teseifest
 import ar.edu.unahur.obj2.caralibro.Escenario
 import ar.edu.unahur.obj2.caralibro.Festival
 import ar.edu.unahur.obj2.caralibro.HoraNombreEscenario
+import ar.edu.unahur.obj2.caralibro.RegistroIngresoVip
 import java.sql.Time
 import java.time.LocalDateTime
 
 class Participante(val edad: Int, val instagram: String, val celular: String, val artista1: String, val artista2: String, val artista3: String){
   val artistasFavoritos = mutableListOf<String>(artista1, artista2, artista3)
-  val escenariosVisitados = mutableListOf<Escenario>()
+  var escenariosVipALosQueYaIngreso = mutableListOf<Escenario>()
 
   var dineroGastadoFoodTrucks = 0
+  var dineroGastadoAcceso = 0
 
   var vipDisponibles: Int = 0
 
   val registroAlcohol = mutableListOf<ControladorAlcohol>()
 
+  var soloComioVegano = true
+
   var consiguioAccesoFANPorFoodTruck = false
   var consiguioAccesoREFANPorFoodTruck = false
   var consiguioAccesoSUPERFANPorFoodTruck = false
-
-  var escenariosVipALosQueYaIngreso = mutableListOf<Escenario>()
 
   fun ingresarAlFestival(){
     Organizacion.registroIngresos.add(Ingreso(this, LocalDateTime.now()))
   }
 
-  fun mostrarProximoEscenarioArtistaInteresALas_(hora: LocalDateTime): Escenario { // esta funcion es lo mas aberrante que hice en mi vida
+  fun mostrarProximoEscenarioArtistaInteresALas_(hora: LocalDateTime): Escenario {
 
     var todosLosConciertosConEscenario = mutableListOf<HoraNombreEscenario>()
 
@@ -69,10 +71,13 @@ class Participante(val edad: Int, val instagram: String, val celular: String, va
     if(producto.cantidadAlcohol() > 0 && !puedeComprarBebidaAlcoholica_(producto)){
       throw Exception("Se pasa de copas")
     }
+    if(!producto.esVegano){
+      soloComioVegano = false
+    }
 
     dineroGastadoFoodTrucks += producto.precio
 
-    producto.foodTruck.registrarVenta(Venta(this, LocalDateTime.now(), producto.precio))
+    producto.foodTruck.registrarVenta(Venta(this, LocalDateTime.now(), producto))
 
     registroAlcohol.add(ControladorAlcohol(LocalDateTime.now(),producto))
 
@@ -94,17 +99,20 @@ class Participante(val edad: Int, val instagram: String, val celular: String, va
     if (!escenariosVipALosQueYaIngreso.contains(escenario)){
       vipDisponibles --
       escenariosVipALosQueYaIngreso.add(escenario)
+      escenario.registroVip.add(RegistroIngresoVip(LocalDateTime.now(), this))
   }
-
 
   fun compraEntradaFAN(){
     vipDisponibles ++
+    dineroGastadoAcceso += 1000
   }
   fun compraEntradaREFAN(){
     vipDisponibles =+ 2
+    dineroGastadoAcceso += 2000
   }
   fun compraEntradaSUPERFAN(){
     vipDisponibles =+ 3
+    dineroGastadoAcceso += 3000
   }
 
 }
